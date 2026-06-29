@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Classics Time Machine</title>
+  <style>
+    @keyframes twinkle { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.85; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spinRev { to { transform: rotate(-360deg); } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+    @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    @keyframes fillBar { from { width: 0%; } to { width: 100%; } }
+    @keyframes countAnim { from { transform: scale(1.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scanUp { from { top: 105%; } to { top: -5%; } }
+    @keyframes ripple { 0% { box-shadow: 0 0 0 0 rgba(0,229,255,0.4); } 100% { box-shadow: 0 0 0 20px rgba(0,229,255,0); } }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; }
+    body { font-family: monospace; background: #020408; }
+
+    .app {
+      position: relative;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 50% 18%, #0C1245 0%, #060816 55%, #020408 100%);
+      overflow: hidden;
+    }
+
+    .stars {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      animation-name: twinkle;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 16px 16px 0;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #050B1C;
+      border: 1px solid #152040;
+      border-radius: 8px;
+      padding: 8px 18px;
+      margin-bottom: 20px;
+      gap: 12px;
+    }
+
+    .status-items { display: flex; gap: 18px; }
+    .status-item { display: flex; align-items: center; gap: 5px; }
+    .status-light {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .status-label { color: #1C3458; font-size: 8px; letter-spacing: 0.07em; }
+    .engine-active {
+      color: #00E5FF;
+      font-size: 8px;
+      letter-spacing: 0.22em;
+      animation: blink 1.4s step-end infinite;
+      white-space: nowrap;
+    }
+    .coords { color: #1C3458; font-size: 8px; letter-spacing: 0.05em; white-space: nowrap; }
+
+    .title { text-align: center; margin-bottom: 24px; }
+    .system-name { color: #182C50; font-size: 9px; letter-spacing: 0.4em; margin-bottom: 10px; }
+    h1 {
+      font-size: clamp(1.7rem, 4vw, 3rem);
+      font-weight: 900;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin: 0 0 12px;
+      background: linear-gradient(90deg, #FFD700 0%, #00E5FF 48%, #FFD700 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .strapline { color: #5A7298; font-size: clamp(0.8rem, 1.8vw, 1rem); letter-spacing: 0.05em; }
+    .strapline span { color: #00E5FF; }
+
+    .dashboard { display: flex; gap: 14px; align-items: center; margin-bottom: 20px; }
+    .side-panel {
+      width: 94px;
+      flex-shrink: 0;
+      background: #060C1E;
+      border: 1px solid #152040;
+      border-radius: 10px;
+      padding: 10px 8px;
+    }
+    .side-title {
+      text-align: center;
+      color: #1A2E50;
+      font-size: 7px;
+      letter-spacing: 0.1em;
+      border-bottom: 1px solid #0F1A35;
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+    }
+    .gauges { display: flex; flex-direction: column; gap: 8px; }
+    .gauge { text-align: center; }
+    .gauge-label {
+      color: #1E3060;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: -3px;
+    }
+
+    .vortex-area { flex: 1; text-align: center; }
+    .vortex {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto;
+      animation: float 5s ease-in-out infinite;
+    }
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border-width: 2px;
+      border-style: solid;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+    }
+    .vortex-core {
+      position: absolute;
+      top: 72px;
+      left: 72px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff 0%, #00E5FF 35%, #7B2FBE 65%, transparent 100%);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    .vortex-icon {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      line-height: 1;
+    }
+    .select-text { color: #182C50; font-size: 9px; letter-spacing: 0.3em; margin-top: 12px; text-transform: uppercase; }
+
+    .destinations { display: flex; gap: 14px; margin-bottom: 20px; }
+    .destination-card {
+      flex: 1;
+      background: #060C1E;
+      border: 2px solid var(--border-color);
+      border-radius: 14px;
+      padding: 22px 14px;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      box-shadow: 0 0 12px var(--glow);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      min-height: 220px;
+      font-family: monospace;
+    }
+    .destination-card:hover:not(:disabled) {
+      background: linear-gradient(160deg, var(--color-soft), var(--color-strong), #060C1E);
+      border-color: var(--color);
+      box-shadow: 0 0 30px var(--glow), 0 0 70px var(--glow-soft);
+      transform: translateY(-4px) scale(1.02);
+    }
+    .destination-card:active:not(:disabled) { transform: scale(0.96); }
+    .destination-card:disabled { cursor: not-allowed; opacity: 0.4; }
+    .dest-icon { font-size: 46px; line-height: 1; }
+    .destination-card:hover:not(:disabled) .dest-icon { animation: pulse 1s ease-in-out infinite; }
+    .dest-name {
+      color: var(--color);
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1.35;
+      transition: text-shadow 0.3s;
+    }
+    .destination-card:hover:not(:disabled) .dest-name { text-shadow: 0 0 14px var(--color); }
+    .dest-tagline { color: #A8BCD8; font-size: 12px; font-style: italic; font-family: Georgia, serif; }
+    .dest-sub { color: #304868; font-size: 9px; letter-spacing: 0.07em; }
+    .dest-year {
+      padding: 3px 10px;
+      background: var(--color-faint);
+      border: 1px solid var(--color-border);
+      border-radius: 5px;
+      color: var(--color);
+      font-size: 8px;
+      letter-spacing: 0.1em;
+    }
+    .engage {
+      margin-top: auto;
+      padding: 8px 16px;
+      background: var(--color-faint);
+      color: var(--color);
+      font-weight: bold;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      border-radius: 7px;
+      transition: all 0.22s;
+      border: 1px solid var(--color);
+    }
+    .destination-card:hover:not(:disabled) .engage {
+      background: var(--color);
+      color: #000;
+      animation: ripple 1.5s ease-out infinite;
+    }
+
+    .diagnostics {
+      background: #050B1C;
+      border: 1px solid #152040;
+      border-radius: 10px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+    }
+    .diagnostics-title { text-align: center; color: #182C50; font-size: 7px; letter-spacing: 0.2em; margin-bottom: 10px; }
+    .meters { display: flex; gap: 20px; }
+    .meter { flex: 1; }
+    .meter-head { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .meter-label { color: #6A88B0; font-size: 8px; letter-spacing: 0.05em; }
+    .meter-pct { color: var(--meter-color); font-size: 8px; text-shadow: 0 0 6px var(--meter-color); }
+    .meter-track { height: 4px; background: #0F1A35; border-radius: 2px; overflow: hidden; }
+    .meter-fill { width: var(--pct); height: 100%; background: var(--meter-color); border-radius: 2px; box-shadow: 0 0 6px var(--meter-color); }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid #152040;
+      background: #030610;
+      padding: 14px 20px;
+      text-align: center;
+    }
+    footer p {
+      color: #7A9CC8;
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-shadow: 0 0 12px rgba(122,156,200,0.4);
+    }
+
+    .travel-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(3,5,18,0.94);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: overlayIn 0.3s ease;
+    }
+    .scan-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--color), transparent);
+      animation: scanUp 2s linear infinite;
+      opacity: 0.65;
+    }
+    .overlay-icon { font-size: 76px; animation: pulse 0.9s ease-in-out infinite; margin-bottom: 18px; }
+    .overlay-title {
+      color: var(--color);
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      text-shadow: 0 0 18px var(--color), 0 0 38px var(--color-alpha);
+      margin-bottom: 8px;
+      animation: pulse 1.8s ease-in-out infinite;
+      text-align: center;
+    }
+    .overlay-destination {
+      color: #3A5880;
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      margin-bottom: 40px;
+      text-transform: uppercase;
+      text-align: center;
+    }
+    .countdown {
+      font-size: 100px;
+      color: var(--color);
+      font-weight: bold;
+      text-shadow: 0 0 30px var(--color);
+      line-height: 1;
+      animation: countAnim 0.45s ease-out;
+      margin-bottom: 32px;
+    }
+    .arrival {
+      font-size: 19px;
+      color: #00FF88;
+      letter-spacing: 0.22em;
+      animation: overlayIn 0.5s ease;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    .progress-track { width: 340px; height: 5px; background: #0F1A35; border-radius: 3px; overflow: hidden; max-width: 80vw; }
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--color), white);
+      animation: fillBar 3s linear forwards;
+      box-shadow: 0 0 8px var(--color);
+    }
+    .sync-text { margin-top: 10px; color: #182840; font-size: 8px; letter-spacing: 0.15em; text-align: center; }
+
+    @media (max-width: 760px) {
+      .status-bar, .dashboard, .destinations, .meters { flex-direction: column; }
+      .status-items { flex-wrap: wrap; justify-content: center; }
+      .side-panel { width: 100%; }
+      .gauges { flex-direction: row; justify-content: space-around; }
+      .destination-card { width: 100%; }
+      .engine-active, .coords { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" id="app">
+    <div class="stars" id="stars" aria-hidden="true"></div>
+
+    <section class="container">
+      <div class="status-bar">
+        <div class="status-items" id="statusItems"></div>
+        <div class="engine-active">▶ TEMPORAL ENGINE ACTIVE ◀</div>
+        <div class="coords">COORD: 51.5°N / 0.1°W</div>
+      </div>
+
+      <header class="title">
+        <div class="system-name">── TEMPORAL NAVIGATION SYSTEM v3.14 ──</div>
+        <h1>The Classics Time Machine</h1>
+        <p class="strapline">🚀 Strap in. You're about to travel <span>2,500 years</span> into the past. Do you dare?</p>
+      </header>
+
+      <section class="dashboard" aria-label="Time machine dashboard">
+        <aside class="side-panel">
+          <div class="side-title">▸ GAUGES ◂</div>
+          <div class="gauges" id="leftGauges"></div>
+        </aside>
+
+        <div class="vortex-area">
+          <div class="vortex" aria-hidden="true" id="vortex"></div>
+          <div class="select-text">▼ Select your destination below ▼</div>
+        </div>
+
+        <aside class="side-panel">
+          <div class="side-title">▸ GAUGES ◂</div>
+          <div class="gauges" id="rightGauges"></div>
+        </aside>
+      </section>
+
+      <section class="destinations" id="destinations" aria-label="Time travel destinations"></section>
+
+      <section class="diagnostics" aria-label="Ship diagnostics">
+        <div class="diagnostics-title">── SHIP DIAGNOSTICS ──</div>
+        <div class="meters" id="meters"></div>
+      </section>
+    </section>
+
+    <footer>
+      <p>My great classics — a learning experience of classics</p>
+    </footer>
+  </main>
+
+  <script>
+    const STARS = Array.from({ length: 100 }, (_, i) => ({
+      id: i,
+      x: ((i * 37.1 + 13) % 100).toFixed(2),
+      y: ((i * 67.3 + 7) % 100).toFixed(2),
+      size: ((i % 3) * 0.7 + 0.5).toFixed(1),
+      opacity: (((i % 5) * 0.12) + 0.15).toFixed(2),
+      dur: (((i % 4) * 0.9) + 1.4).toFixed(1),
+      delay: ((i % 9) * 0.35).toFixed(1),
+      color: i % 11 === 0 ? "#FFD700" : i % 7 === 0 ? "#7B90C8" : "white",
+    }));
+
+    const DESTS = [
+      {
+        id: "greece",
+        icon: "🏛️",
+        name: "Ancient Greece",
+        tagline: "Myths. Heroes. Monsters.",
+        sub: "Olympics · The Odyssey · Democracy",
+        year: "~500 BC",
+        color: "#3DA8FF",
+        glow: "rgba(61,168,255,0.32)",
+      },
+      {
+        id: "rome",
+        icon: "🦅",
+        name: "Ancient Rome",
+        tagline: "Conquer. Build. Rule.",
+        sub: "Gladiators · Caesar · The Colosseum",
+        year: "~44 BC",
+        color: "#FF4A4A",
+        glow: "rgba(255,74,74,0.32)",
+      },
+      {
+        id: "classics",
+        icon: "📜",
+        name: "What is Classics?",
+        tagline: "The greatest subject. Ever.",
+        sub: "Language · History · Philosophy",
+        year: "3000 BC → 500 AD",
+        color: "#FFD700",
+        glow: "rgba(255,215,0,0.32)",
+      },
+    ];
+
+    const leftGauges = [
+      { label: "FLUX CORE", pct: 87, color: "#00E5FF" },
+      { label: "CHRONO PWR", pct: 64, color: "#FFD700" },
+      { label: "TIME SEAL", pct: 95, color: "#00FF88" },
+    ];
+
+    const rightGauges = [
+      { label: "PARADOX", pct: 100, color: "#00FF88" },
+      { label: "STABILITY", pct: 73, color: "#FF4A4A" },
+      { label: "SIGNAL", pct: 91, color: "#7B2FBE" },
+    ];
+
+    const meters = [
+      { label: "ADVENTURE LEVEL", pct: 100, color: "#00FF88" },
+      { label: "FUN QUOTIENT", pct: 97, color: "#FFD700" },
+      { label: "HISTORY UNLOCKED", pct: 0, color: "#00E5FF" },
+      { label: "DANGER RATING", pct: 42, color: "#FF4A4A" },
+    ];
+
+    const app = document.getElementById("app");
+    let traveling = false;
+
+    function alphaColour(hex, alpha) {
+      const clean = hex.replace("#", "");
+      const r = parseInt(clean.slice(0, 2), 16);
+      const g = parseInt(clean.slice(2, 4), 16);
+      const b = parseInt(clean.slice(4, 6), 16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+
+    function makeEl(tag, className, text) {
+      const el = document.createElement(tag);
+      if (className) el.className = className;
+      if (text !== undefined) el.textContent = text;
+      return el;
+    }
+
+    function renderStars() {
+      const stars = document.getElementById("stars");
+      STARS.forEach((s) => {
+        const star = makeEl("div", "star");
+        Object.assign(star.style, {
+          left: `${s.x}%`,
+          top: `${s.y}%`,
+          width: `${s.size}px`,
+          height: `${s.size}px`,
+          background: s.color,
+          opacity: s.opacity,
+          animationDuration: `${s.dur}s`,
+          animationDelay: `${s.delay}s`,
+        });
+        stars.appendChild(star);
+      });
+    }
+
+    function renderStatusItems() {
+      const statusItems = document.getElementById("statusItems");
+      [
+        { label: "POWER", color: "#00FF88" },
+        { label: "FLUX", color: "#FFD700" },
+        { label: "WARP", color: "#00E5FF" },
+      ].forEach((s, i) => {
+        const item = makeEl("div", "status-item");
+        const light = makeEl("div", "status-light");
+        light.style.background = s.color;
+        light.style.boxShadow = `0 0 5px ${s.color}`;
+        light.style.animationDelay = `${i * 0.6}s`;
+        const label = makeEl("span", "status-label", `${s.label}: ONLINE`);
+        item.append(light, label);
+        statusItems.appendChild(item);
+      });
+    }
+
+    function renderVortex() {
+      const vortex = document.getElementById("vortex");
+      const rings = [
+        { size: 168, dur: "4s", color: "#00E5FF", dir: "spin" },
+        { size: 136, dur: "3.1s", color: "#7B2FBE", dir: "spinRev" },
+        { size: 104, dur: "2.3s", color: "#FFD700", dir: "spin" },
+        { size: 72, dur: "1.6s", color: "#FF4A4A", dir: "spinRev" },
+      ];
+      rings.forEach((r) => {
+        const offset = (200 - r.size) / 2;
+        const ring = makeEl("div", "ring");
+        Object.assign(ring.style, {
+          top: `${offset}px`,
+          left: `${offset}px`,
+          width: `${r.size}px`,
+          height: `${r.size}px`,
+          borderColor: r.color,
+          animationName: r.dir,
+          animationDuration: r.dur,
+          boxShadow: `0 0 8px ${r.color}, inset 0 0 6px ${r.color}33`,
+        });
+        vortex.appendChild(ring);
+      });
+      vortex.append(makeEl("div", "vortex-core"), makeEl("div", "vortex-icon", "⏱️"));
+    }
+
+    function gaugeSvg({ label, pct, color }) {
+      const r = 29;
+      const circ = 2 * Math.PI * r;
+      const filled = circ * (pct / 100);
+      const wrap = makeEl("div", "gauge");
+      wrap.innerHTML = `
+        <svg width="72" height="72" viewBox="0 0 72 72" aria-hidden="true">
+          <circle cx="36" cy="36" r="${r}" fill="none" stroke="#0F1A35" stroke-width="6"></circle>
+          <circle cx="36" cy="36" r="${r}" fill="none" stroke="${color}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${filled} ${circ - filled}" transform="rotate(-90 36 36)" style="filter: drop-shadow(0 0 4px ${color});"></circle>
+          <text x="36" y="41" text-anchor="middle" fill="${color}" font-size="11" font-family="monospace" font-weight="bold">${pct}%</text>
+        </svg>
+        <div class="gauge-label">${label}</div>
+      `;
+      return wrap;
+    }
+
+    function renderGauges() {
+      const left = document.getElementById("leftGauges");
+      const right = document.getElementById("rightGauges");
+      leftGauges.forEach((g) => left.appendChild(gaugeSvg(g)));
+      rightGauges.forEach((g) => right.appendChild(gaugeSvg(g)));
+    }
+
+    function renderDestinations() {
+      const destinations = document.getElementById("destinations");
+      DESTS.forEach((dest) => {
+        const button = makeEl("button", "destination-card");
+        button.type = "button";
+        button.style.setProperty("--color", dest.color);
+        button.style.setProperty("--border-color", alphaColour(dest.color, 0.33));
+        button.style.setProperty("--glow", dest.glow);
+        button.style.setProperty("--glow-soft", alphaColour(dest.color, 0.08));
+        button.style.setProperty("--color-soft", alphaColour(dest.color, 0.10));
+        button.style.setProperty("--color-strong", alphaColour(dest.color, 0.19));
+        button.style.setProperty("--color-faint", alphaColour(dest.color, 0.08));
+        button.style.setProperty("--color-border", alphaColour(dest.color, 0.27));
+        button.innerHTML = `
+          <div class="dest-icon">${dest.icon}</div>
+          <div class="dest-name">${dest.name}</div>
+          <div class="dest-tagline">&quot;${dest.tagline}&quot;</div>
+          <div class="dest-sub">${dest.sub}</div>
+          <div class="dest-year">📅 ${dest.year}</div>
+          <div class="engage">▶ ENGAGE TIME DRIVE</div>
+        `;
+        button.addEventListener("click", () => handleTravel(dest));
+        destinations.appendChild(button);
+      });
+    }
+
+    function setDestinationButtonsDisabled(disabled) {
+      document.querySelectorAll(".destination-card").forEach((button) => {
+        button.disabled = disabled;
+      });
+    }
+
+    function renderMeters() {
+      const metersWrap = document.getElementById("meters");
+      meters.forEach((m) => {
+        const meter = makeEl("div", "meter");
+        meter.style.setProperty("--meter-color", m.color);
+        meter.style.setProperty("--pct", `${m.pct}%`);
+        meter.innerHTML = `
+          <div class="meter-head">
+            <span class="meter-label">${m.label}</span>
+            <span class="meter-pct">${m.pct}%</span>
+          </div>
+          <div class="meter-track"><div class="meter-fill"></div></div>
+        `;
+        metersWrap.appendChild(meter);
+      });
+    }
+
+    function createTravelOverlay(dest, countdown, done) {
+      const overlay = makeEl("div", "travel-overlay");
+      overlay.style.setProperty("--color", dest.color);
+      overlay.style.setProperty("--color-alpha", alphaColour(dest.color, 0.44));
+      overlay.innerHTML = `
+        <div class="scan-line"></div>
+        <div class="overlay-icon">${dest.icon}</div>
+        <div class="overlay-title">⚡ TIME TRAVEL INITIATED ⚡</div>
+        <div class="overlay-destination">DESTINATION LOCKED → ${dest.name.toUpperCase()}</div>
+        ${done
+          ? '<div class="arrival">🚀 ARRIVING IN THE ANCIENT WORLD...</div>'
+          : `<div class="countdown" id="countdown">${countdown}</div>`}
+        <div class="progress-track"><div class="progress-fill"></div></div>
+        <div class="sync-text">TEMPORAL SYNCHRONISATION IN PROGRESS</div>
+      `;
+      return overlay;
+    }
+
+    function updateTravelOverlay(dest, countdown, done) {
+      const oldOverlay = document.querySelector(".travel-overlay");
+      const newOverlay = createTravelOverlay(dest, countdown, done);
+      if (oldOverlay) oldOverlay.replaceWith(newOverlay);
+      else app.appendChild(newOverlay);
+    }
+
+    function handleTravel(dest) {
+      if (traveling) return;
+      traveling = true;
+      setDestinationButtonsDisabled(true);
+      updateTravelOverlay(dest, 3, false);
+
+      let count = 3;
+      const timer = setInterval(() => {
+        count -= 1;
+        if (count <= 0) {
+          clearInterval(timer);
+          updateTravelOverlay(dest, 0, true);
+          setTimeout(() => {
+            const overlay = document.querySelector(".travel-overlay");
+            if (overlay) overlay.remove();
+            traveling = false;
+            setDestinationButtonsDisabled(false);
+          }, 2100);
+        } else {
+          updateTravelOverlay(dest, count, false);
+        }
+      }, 1000);
+    }
+
+    renderStars();
+    renderStatusItems();
+    renderVortex();
+    renderGauges();
+    renderDestinations();
+    renderMeters();
+  </script>
+</body>
+</html>
