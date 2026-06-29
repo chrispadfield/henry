@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title id="page-title">Ancient Greece — Topic</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background:
+        radial-gradient(ellipse at 50% 0%, #3A0808 0%, #160408 45%, #05010A 100%);
+      font-family: Georgia, serif;
+      color: white;
+    }
+
+    /* Decorative Greek-key top and bottom border */
+    body::before, body::after {
+      content: '';
+      display: block;
+      position: fixed;
+      left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg,
+        #5C3800, #C9A84C, #FFD700, #C9A84C, #5C3800);
+    }
+    body::before { top: 0; }
+    body::after  { bottom: 0; }
+
+    /* Back button */
+    #back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      color: rgba(201,168,76,0.6);
+      text-decoration: none;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    #back-btn:hover { color: #FFD700; }
+
+    /* Main card */
+    .card {
+      max-width: 760px;
+      width: 100%;
+      text-align: center;
+      border: 1px solid rgba(201,168,76,0.35);
+      border-radius: 4px;
+      padding: 60px 48px 52px;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(6px);
+    }
+
+    /* Decorative top line */
+    .ornament {
+      color: rgba(201,168,76,0.5);
+      font-size: 13px;
+      letter-spacing: 0.3em;
+      font-family: 'Courier New', monospace;
+      margin-bottom: 24px;
+    }
+
+    /* Topic label */
+    .topic-label {
+      color: rgba(201,168,76,0.5);
+      font-size: 9px;
+      letter-spacing: 0.5em;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    /* Main heading */
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: 'Courier New', monospace;
+      background: linear-gradient(175deg, #FFE066 0%, #C9A84C 55%, #8B6914 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 24px;
+    }
+
+    /* Divider */
+    .divider {
+      color: rgba(201,168,76,0.4);
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      margin: 0 auto 28px;
+    }
+
+    /* Sub-heading / description -->
+    .sub-desc {
+      color: rgba(240,215,155,0.65);
+      font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+      font-style: italic;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    /* Coming-soon text */
+    .coming-soon {
+      color: rgba(201,168,76,0.45);
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      margin-bottom: 36px;
+    }
+
+    /* Back link button */
+    .back-link {
+      display: inline-block;
+      padding: 12px 32px;
+      color: #C9A84C;
+      border: 1px solid rgba(201,168,76,0.45);
+      border-radius: 2px;
+      text-decoration: none;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      transition: all 0.2s ease;
+      background: rgba(201,168,76,0.06);
+    }
+    .back-link:hover {
+      background: rgba(201,168,76,0.16);
+      color: #FFD700;
+      border-color: #FFD700;
+      box-shadow: 0 0 18px rgba(255,215,0,0.25);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card { animation: fadeUp 0.7s ease both; }
+  </style>
+</head>
+<body>
+
+  <a id="back-btn" href="greece.html">◂ Back to Ancient Greece</a>
+
+  <div class="card">
+    <div class="ornament">── Ω ──</div>
+    <div class="topic-label" id="section-label">Ancient Greece</div>
+    <h1 id="topic-heading">Topic</h1>
+    <div class="divider">──────────── Δ ────────────</div>
+    <p class="sub-desc" id="topic-sub"></p>
+    <p class="coming-soon">
+      This chapter is being written by the gods of Olympus.<br/>
+      Return soon, traveller.
+    </p>
+    <a class="back-link" href="greece.html">◂ Return to Ancient Greece</a>
+  </div>
+
+  <script>
+    // Read topic name and subtitle from URL query params
+    const params  = new URLSearchParams(window.location.search);
+    const topic   = params.get('t')   || 'Topic';
+    const sub     = params.get('sub') || '';
+
+    document.getElementById('topic-heading').textContent = topic;
+    document.getElementById('page-title').textContent    = topic + ' — Ancient Greece';
+
+    if (sub) {
+      document.getElementById('topic-sub').textContent = sub;
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ancient Greece — The Classics Time Machine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── FULL-SCREEN SVG BACKGROUND ──────────────────────── */
+    #bg-scene {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    /* ── TOP NAV ──────────────────────────────────────────── */
+    nav#top-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 20;
+      background: rgba(5, 1, 1, 0.92);
+      border-bottom: 2px solid #C9A84C;
+      backdrop-filter: blur(6px);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: stretch;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .nav-link {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px 6px;
+      color: #C9A84C;
+      text-decoration: none;
+      font-size: clamp(8px, 1.05vw, 12px);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      border-right: 1px solid rgba(201, 168, 76, 0.15);
+      text-align: center;
+      line-height: 1.3;
+      transition: background 0.2s, color 0.2s, text-shadow 0.2s;
+    }
+    .nav-link:last-child { border-right: none; }
+    .nav-link:hover {
+      background: rgba(201, 168, 76, 0.14);
+      color: #FFD700;
+      text-shadow: 0 0 14px rgba(255, 215, 0, 0.7);
+    }
+
+    /* ── BACK BUTTON ──────────────────────────────────────── */
+    #back-btn {
+      position: fixed;
+      top: 58px;
+      left: 16px;
+      z-index: 21;
+      color: rgba(201, 168, 76, 0.5);
+      text-decoration: none;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      padding: 6px 0;
+    }
+    #back-btn:hover { color: #FFD700; }
+
+    /* ── CENTRAL CONTENT ──────────────────────────────────── */
+    #main-content {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px 130px;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    /* ── ANIMATIONS ───────────────────────────────────────── */
+    @keyframes textGlow {
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(255,200,60,0.35)); }
+      50%       { filter: drop-shadow(0 0 28px rgba(255,200,60,0.85)); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    .main-title {
+      font-size: clamp(3rem, 6.5vw, 6rem);
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: 'Courier New', monospace;
+      background: linear-gradient(175deg, #FFE066 0%, #C9A84C 55%, #7A5C10 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: textGlow 4s ease-in-out infinite, fadeUp 1s ease 0.2s both;
+      margin-bottom: 20px;
+    }
+
+    .main-quote {
+      color: rgba(245, 215, 155, 0.78);
+      font-size: clamp(1rem, 2.2vw, 1.45rem);
+      font-style: italic;
+      max-width: 580px;
+      line-height: 1.6;
+      animation: fadeUp 1s ease 0.6s both;
+    }
+
+    .quote-attr {
+      color: rgba(201, 168, 76, 0.45);
+      font-size: 10px;
+      letter-spacing: 0.32em;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      margin-top: 10px;
+      animation: fadeUp 1s ease 0.9s both;
+    }
+
+    /* ── BATTLE BUTTON ────────────────────────────────────── */
+    #battle-wrap {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 18px 20px 24px;
+      background: linear-gradient(to top, rgba(3,0,0,0.97) 0%, transparent 100%);
+    }
+
+    #battle-btn {
+      pointer-events: all;
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      background: linear-gradient(135deg, #5C0000, #8B1A1A, #5C0000);
+      color: #FFD700;
+      font-size: clamp(15px, 2vw, 22px);
+      font-weight: bold;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      font-family: 'Courier New', monospace;
+      text-decoration: none;
+      padding: 18px 56px;
+      border: 2px solid #C9A84C;
+      border-radius: 2px;
+      box-shadow: 0 0 28px rgba(100, 0, 0, 0.75),
+                  0 0 60px rgba(100, 0, 0, 0.35),
+                  inset 0 0 24px rgba(0,0,0,0.5);
+      transition: all 0.25s ease;
+      animation: fadeUp 1s ease 1.2s both;
+    }
+    #battle-btn:hover {
+      background: linear-gradient(135deg, #7A0000, #C0392B, #7A0000);
+      box-shadow: 0 0 40px rgba(180,0,0,0.9), 0 0 80px rgba(180,0,0,0.45);
+      transform: scale(1.05);
+      color: #FFFFFF;
+      border-color: #FFD700;
+      letter-spacing: 0.6em;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════
+     SVG BACKGROUND — BATTLE SCENE WITH HOPLITE SILHOUETTE
+     ════════════════════════════════════════════════════════ -->
+<svg id="bg-scene"
+     viewBox="0 0 1400 900"
+     preserveAspectRatio="xMidYMid slice"
+     xmlns="http://www.w3.org/2000/svg">
+  <defs>
+
+    <!-- Battle sky: pre-dawn crimson -->
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#07021C"/>
+      <stop offset="18%"  stop-color="#360808"/>
+      <stop offset="48%"  stop-color="#A82E0E"/>
+      <stop offset="76%"  stop-color="#E25E0C"/>
+      <stop offset="100%" stop-color="#F59018"/>
+    </linearGradient>
+
+    <!-- Ground -->
+    <linearGradient id="gnd" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#1A0806"/>
+      <stop offset="100%" stop-color="#040101"/>
+    </linearGradient>
+
+    <!-- Vignette at bottom -->
+    <linearGradient id="vig" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <!-- Top darkening -->
+    <linearGradient id="topfade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#000" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Horizon glow behind hoplite -->
+    <radialGradient id="hglow" cx="52%" cy="78%" r="55%">
+      <stop offset="0%"   stop-color="#FF6800" stop-opacity="0.38"/>
+      <stop offset="100%" stop-color="#FF3000" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Rim-light filter on hoplite (creates backlit glow) -->
+    <filter id="rim" x="-18%" y="-12%" width="136%" height="124%">
+      <feDropShadow dx="0" dy="0" stdDeviation="11"
+                    flood-color="#E06010" flood-opacity="0.6"/>
+    </filter>
+
+    <!-- ── MINI-SOLDIER SYMBOL (reused for background army) ── -->
+    <!-- Shares the same coordinate space as the main hoplite  -->
+    <!-- so scale transforms work consistently.                 -->
+    <symbol id="sol" overflow="visible">
+      <!-- Crest plume -->
+      <polygon points="688,252 712,252 718,208 722,172 718,146
+                        710,130 700,126 690,130 682,146 678,172 682,208"/>
+      <!-- Helmet: skull + cheeks -->
+      <ellipse cx="700" cy="308" rx="56" ry="62"/>
+      <ellipse cx="700" cy="358" rx="64" ry="44"/>
+      <!-- Torso -->
+      <polygon points="612,406 788,406 772,548 628,548"/>
+      <!-- Shield (aspis) -->
+      <circle  cx="462" cy="470" r="112"/>
+      <!-- Spear shaft + tip -->
+      <polygon points="830,718 842,714 841,140 829,144"/>
+      <polygon points="829,144 841,144 835,118"/>
+      <!-- Legs -->
+      <polygon points="636,612 678,612 672,756 632,756"/>
+      <polygon points="722,612 764,612 770,756 728,756"/>
+    </symbol>
+
+  </defs>
+
+  <!-- ── SKY ── -->
+  <rect width="1400" height="900" fill="url(#sky)"/>
+
+  <!-- ── HORIZON GLOW ── -->
+  <rect width="1400" height="900" fill="url(#hglow)"/>
+
+  <!-- ── LIGHT RAYS ── -->
+  <g opacity="0.055" stroke="#FFB040">
+    <line x1="880" y1="670" x2="1400" y2="0"   stroke-width="70"/>
+    <line x1="880" y1="670" x2="1400" y2="280" stroke-width="50"/>
+    <line x1="880" y1="670" x2="1150" y2="0"   stroke-width="35"/>
+    <line x1="880" y1="670" x2="0"    y2="90"  stroke-width="22"/>
+    <line x1="880" y1="670" x2="180"  y2="0"   stroke-width="14"/>
+    <line x1="880" y1="670" x2="450"  y2="0"   stroke-width="10"/>
+  </g>
+
+  <!-- ── TOP DARKENING ── -->
+  <rect width="1400" height="95" fill="url(#topfade)"/>
+
+  <!-- ── FAR MOUNTAINS ── -->
+  <polygon
+    points="0,598 90,492 210,534 355,456 490,508
+             628,428 748,468 888,407 1025,452
+             1165,386 1290,432 1400,396 1400,900 0,900"
+    fill="#110508" opacity="0.92"/>
+
+  <!-- ── NEARER HILLS ── -->
+  <polygon
+    points="0,696 145,650 275,664 415,630 565,652
+             710,616 858,640 1005,610 1155,632
+             1305,604 1400,622 1400,900 0,900"
+    fill="#0C0305"/>
+
+  <!-- Atmospheric haze over middle hills -->
+  <rect x="0" y="640" width="1400" height="120" fill="rgba(45,12,22,0.22)"/>
+
+  <!-- ── GROUND ── -->
+  <rect y="748" width="1400" height="152" fill="url(#gnd)"/>
+
+  <!-- Ground dust/texture lines -->
+  <g stroke="#3A1A08" stroke-width="1" opacity="0.18">
+    <line x1="0" y1="760" x2="1400" y2="760"/>
+    <line x1="0" y1="772" x2="1400" y2="772"/>
+  </g>
+
+  <!-- ── BACKGROUND ARMY — LEFT FLANK ── -->
+  <!-- Translate-y calculated so each soldier's feet land at y≈720 -->
+  <g fill="#0B0206" opacity="0.70">
+    <use href="#sol" transform="translate(52,  639) scale(0.106)"/>
+    <use href="#sol" transform="translate(95,  644) scale(0.099)"/>
+    <use href="#sol" transform="translate(133, 634) scale(0.113)"/>
+    <use href="#sol" transform="translate(174, 641) scale(0.103)"/>
+    <use href="#sol" transform="translate(212, 646) scale(0.097)"/>
+    <use href="#sol" transform="translate(248, 637) scale(0.109)"/>
+    <use href="#sol" transform="translate(285, 643) scale(0.101)"/>
+    <use href="#sol" transform="translate(322, 638) scale(0.107)"/>
+  </g>
+
+  <!-- ── BACKGROUND ARMY — RIGHT FLANK ── -->
+  <g fill="#0B0206" opacity="0.62">
+    <use href="#sol" transform="translate(1058, 640) scale(0.105)"/>
+    <use href="#sol" transform="translate(1096, 644) scale(0.099)"/>
+    <use href="#sol" transform="translate(1133, 635) scale(0.112)"/>
+    <use href="#sol" transform="translate(1172, 641) scale(0.103)"/>
+    <use href="#sol" transform="translate(1210, 646) scale(0.097)"/>
+    <use href="#sol" transform="translate(1248, 637) scale(0.108)"/>
+    <use href="#sol" transform="translate(1285, 643) scale(0.100)"/>
+    <use href="#sol" transform="translate(1322, 639) scale(0.106)"/>
+  </g>
+
+  <!-- ── DUST CLOUDS ── -->
+  <g opacity="0.22">
+    <ellipse cx="185"  cy="754" rx="130" ry="20" fill="#AA5510"/>
+    <ellipse cx="520"  cy="758" rx="85"  ry="13" fill="#A04808"/>
+    <ellipse cx="1080" cy="752" rx="150" ry="18" fill="#AA5010"/>
+    <ellipse cx="1295" cy="756" rx="95"  ry="15" fill="#A04808"/>
+  </g>
+
+  <!-- ── GLOW BEHIND HOPLITE ── -->
+  <ellipse cx="700" cy="485" rx="210" ry="320"
+           fill="rgba(225,75,12,0.20)"/>
+
+  <!-- ══════════════════════════════════════════════
+       MAIN HOPLITE SILHOUETTE
+       All shapes share the same fill from the group.
+       Rim-glow filter adds the backlit orange edge.
+       ══════════════════════════════════════════════ -->
+  <g fill="#060101" filter="url(#rim)" id="main-hoplite">
+
+    <!-- SPEAR SHAFT (nearly vertical, slight rightward lean) -->
+    <polygon points="829,718 841,714 840,140 828,144"/>
+    <!-- Spear blade (tip) -->
+    <polygon points="828,144 840,144 834,116"/>
+    <!-- Butt spike -->
+    <polygon points="829,718 841,714 835,740"/>
+
+    <!-- HORSEHAIR CREST (lophos — tall plume above helmet) -->
+    <polygon points="687,252 713,252 719,208 724,172
+                     720,144 712,128 705,124 700,122
+                     695,124 688,128 680,144 676,172 681,208"/>
+    <!-- Crest base plate (sits on top of helmet) -->
+    <rect x="684" y="248" width="32" height="13" rx="3"/>
+
+    <!-- CORINTHIAN HELMET — skull dome -->
+    <ellipse cx="700" cy="306" rx="57" ry="63"/>
+    <!-- Cheek guards (wider lower section) -->
+    <ellipse cx="700" cy="358" rx="65" ry="45"/>
+    <!-- Chin/lower cheek area -->
+    <ellipse cx="700" cy="387" rx="39" ry="23"/>
+
+    <!-- NECK -->
+    <rect x="686" y="378" width="28" height="32" rx="4"/>
+
+    <!-- SHOULDER PAULDRONS -->
+    <ellipse cx="628" cy="412" rx="36" ry="19"/>
+    <ellipse cx="772" cy="412" rx="36" ry="19"/>
+
+    <!-- BREASTPLATE (linothorax) -->
+    <polygon points="604,406 796,406 778,552 622,552"/>
+
+    <!-- PTERYGES — waist band -->
+    <rect x="618" y="548" width="162" height="11" rx="2"/>
+    <!-- Leather strips (8, alternating lengths) -->
+    <rect x="621" y="559" width="16" height="53" rx="4"/>
+    <rect x="640" y="559" width="16" height="47" rx="4"/>
+    <rect x="659" y="559" width="16" height="55" rx="4"/>
+    <rect x="678" y="559" width="16" height="49" rx="4"/>
+    <rect x="697" y="559" width="16" height="56" rx="4"/>
+    <rect x="716" y="559" width="16" height="47" rx="4"/>
+    <rect x="735" y="559" width="16" height="53" rx="4"/>
+    <rect x="754" y="559" width="16" height="49" rx="4"/>
+
+    <!-- LEFT ARM (extended toward shield) -->
+    <rect x="554" y="415" width="24" height="92" rx="9"
+          transform="rotate(22, 566, 461)"/>
+    <!-- Forearm (horizontal) -->
+    <rect x="516" y="464" width="84" height="20" rx="7"/>
+
+    <!-- ASPIS — the great round hoplite shield -->
+    <!-- Outer rim (slightly larger) -->
+    <circle cx="458" cy="472" r="118"/>
+
+    <!-- RIGHT ARM (holding spear aloft) -->
+    <rect x="782" y="410" width="24" height="90" rx="9"
+          transform="rotate(-13, 794, 455)"/>
+
+    <!-- LEGS -->
+    <polygon points="632,616 676,616 670,752 628,752"/>
+    <polygon points="724,616 768,616 774,752 730,752"/>
+
+    <!-- GREAVES (overlapping lower leg) -->
+    <rect x="628" y="686" width="50" height="70" rx="6"/>
+    <rect x="730" y="686" width="50" height="70" rx="6"/>
+
+    <!-- FEET / SANDALS -->
+    <ellipse cx="652" cy="754" rx="46" ry="14"/>
+    <ellipse cx="754" cy="754" rx="46" ry="14"/>
+
+  </g><!-- end main hoplite -->
+
+  <!-- Ground shadow beneath hoplite -->
+  <ellipse cx="694" cy="759" rx="178" ry="22"
+           fill="rgba(0,0,0,0.50)"/>
+
+  <!-- ── BOTTOM VIGNETTE ── -->
+  <rect y="738" width="1400" height="162" fill="url(#vig)"/>
+
+</svg>
+
+<!-- ── BACK BUTTON ───────────────────────────────────────────────────── -->
+<a id="back-btn" href="index.html">◂ Return to Time Machine</a>
+
+<!-- ── TOP NAVIGATION BAR ────────────────────────────────────────────── -->
+<nav id="top-nav">
+  <div class="nav-inner">
+    <a class="nav-link" href="topic.html?t=City+States&sub=The+heart+of+Greek+civilisation">City States</a>
+    <a class="nav-link" href="topic.html?t=Politics&sub=How+the+Greeks+invented+democracy">Politics</a>
+    <a class="nav-link" href="topic.html?t=Governments&sub=From+tyrants+to+republics">Governments</a>
+    <a class="nav-link" href="topic.html?t=Warfare&sub=The+art+of+the+phalanx">Warfare</a>
+    <a class="nav-link" href="topic.html?t=Entertainment&sub=Theatre%2C+games+and+festivals">Entertainment</a>
+    <a class="nav-link" href="topic.html?t=Culture&sub=Philosophy%2C+art+and+daily+life">Culture</a>
+    <a class="nav-link" href="topic.html?t=Architecture&sub=Columns%2C+temples+and+monuments">Architecture</a>
+  </div>
+</nav>
+
+<!-- ── CENTRAL TITLE CONTENT ─────────────────────────────────────────── -->
+<div id="main-content">
+  <div>
+    <div style="color:rgba(201,168,76,0.42); font-size:9px; letter-spacing:0.55em;
+                font-family:'Courier New',monospace; text-transform:uppercase;
+                margin-bottom:20px;">
+      ── Temporal Arrival: 500 BC ──
+    </div>
+    <h1 class="main-title">Ancient Greece</h1>
+    <p class="main-quote">
+      "Not life, but good life, is to be chiefly valued."
+    </p>
+    <p class="quote-attr">— Socrates</p>
+  </div>
+</div>
+
+<!-- ── BATTLE BUTTON ─────────────────────────────────────────────────── -->
+<div id="battle-wrap">
+  <a id="battle-btn" href="battle.html">⚔️ &nbsp; BATTLE &nbsp; ⚔️</a>
+</div>
+
+<!-- ── JAVASCRIPT ────────────────────────────────────────────────────── -->
+<script>
+  // Subtle mouse-parallax: hoplite sways gently with cursor
+  const hoplite = document.getElementById('main-hoplite');
+  let ticking = false;
+
+  document.addEventListener('mousemove', e => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const cx = window.innerWidth  / 2;
+      const cy = window.innerHeight / 2;
+      const dx = (e.clientX - cx) / cx;  // –1 to +1
+      const dy = (e.clientY - cy) / cy;
+      hoplite.style.transform = `translate(${dx * 10}px, ${dy * 4}px)`;
+      ticking = false;
+    });
+  });
+</script>
+
+</body>
+</html>

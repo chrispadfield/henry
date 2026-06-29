@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Battle — Ancient Greece</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background: radial-gradient(ellipse at 50% 30%,
+        #5C0000 0%, #250104 40%, #05010A 100%);
+      font-family: Georgia, serif;
+      color: white;
+      overflow: hidden;
+    }
+
+    /* Gold border strips */
+    body::before, body::after {
+      content: '';
+      display: block;
+      position: fixed;
+      left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg,
+        #5C0000, #C0392B, #FFD700, #C0392B, #5C0000);
+    }
+    body::before { top: 0; }
+    body::after  { bottom: 0; }
+
+    /* Back button */
+    #back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      color: rgba(201,168,76,0.55);
+      text-decoration: none;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      z-index: 10;
+    }
+    #back-btn:hover { color: #FFD700; }
+
+    /* Animated background clash lines */
+    .clash-line {
+      position: fixed;
+      width: 2px;
+      background: linear-gradient(to bottom, transparent, rgba(200,50,0,0.3), transparent);
+      animation: clashPulse ease-in-out infinite;
+    }
+    @keyframes clashPulse {
+      0%, 100% { opacity: 0.1; transform: scaleY(0.8); }
+      50%       { opacity: 0.5; transform: scaleY(1.2); }
+    }
+
+    /* Pulsing red glow circles */
+    .glow-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(60px);
+      animation: orbPulse ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes orbPulse {
+      0%, 100% { opacity: 0.15; transform: scale(1); }
+      50%       { opacity: 0.30; transform: scale(1.15); }
+    }
+
+    /* Main card */
+    .card {
+      position: relative;
+      z-index: 5;
+      max-width: 780px;
+      width: 100%;
+      text-align: center;
+      border: 2px solid rgba(180,30,0,0.55);
+      border-radius: 4px;
+      padding: 56px 48px 48px;
+      background: rgba(0,0,0,0.60);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 40px rgba(140,0,0,0.35), 0 0 80px rgba(140,0,0,0.15);
+    }
+
+    .ornament {
+      color: rgba(192,57,43,0.7);
+      font-size: 24px;
+      letter-spacing: 0.2em;
+      margin-bottom: 20px;
+    }
+
+    .section-label {
+      color: rgba(201,168,76,0.45);
+      font-size: 9px;
+      letter-spacing: 0.5em;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 7vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-family: 'Courier New', monospace;
+      background: linear-gradient(175deg, #FF6060 0%, #C0392B 40%, #8B0000 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+      animation: titlePulse 3s ease-in-out infinite;
+    }
+    @keyframes titlePulse {
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(200,30,0,0.4)); }
+      50%       { filter: drop-shadow(0 0 28px rgba(200,30,0,0.9)); }
+    }
+
+    .divider {
+      color: rgba(180,30,0,0.5);
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      margin: 8px auto 28px;
+    }
+
+    .sub-text {
+      color: rgba(240,200,180,0.70);
+      font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+      font-style: italic;
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    .battles-label {
+      color: rgba(201,168,76,0.45);
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      margin: 28px 0 16px;
+    }
+
+    /* Famous battles preview (coming soon) */
+    .battles-grid {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+    .battle-chip {
+      padding: 6px 14px;
+      border: 1px solid rgba(180,30,0,0.4);
+      border-radius: 2px;
+      color: rgba(220,160,140,0.6);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      background: rgba(120,0,0,0.15);
+    }
+
+    .coming-soon {
+      color: rgba(201,168,76,0.4);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+
+    .back-link {
+      display: inline-block;
+      padding: 12px 32px;
+      color: #C9A84C;
+      border: 1px solid rgba(201,168,76,0.4);
+      border-radius: 2px;
+      text-decoration: none;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      transition: all 0.2s ease;
+      background: rgba(201,168,76,0.05);
+    }
+    .back-link:hover {
+      background: rgba(201,168,76,0.14);
+      color: #FFD700;
+      border-color: #FFD700;
+      box-shadow: 0 0 18px rgba(255,215,0,0.22);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card { animation: fadeUp 0.7s ease both; }
+  </style>
+</head>
+<body>
+
+  <!-- Atmospheric red glow orbs -->
+  <div class="glow-orb" style="width:500px;height:500px;background:#8B0000;
+       top:-100px;left:-150px;animation-duration:4s;animation-delay:0s;"></div>
+  <div class="glow-orb" style="width:400px;height:400px;background:#6B0000;
+       bottom:-80px;right:-100px;animation-duration:5s;animation-delay:1.5s;"></div>
+
+  <!-- Animated vertical clash lines -->
+  <div class="clash-line" style="height:100%;top:0;left:20%;animation-duration:3s;animation-delay:0s;"></div>
+  <div class="clash-line" style="height:100%;top:0;left:45%;animation-duration:4s;animation-delay:0.8s;"></div>
+  <div class="clash-line" style="height:100%;top:0;left:70%;animation-duration:3.5s;animation-delay:1.6s;"></div>
+  <div class="clash-line" style="height:100%;top:0;left:85%;animation-duration:2.8s;animation-delay:0.4s;"></div>
+
+  <a id="back-btn" href="greece.html">◂ Back to Ancient Greece</a>
+
+  <div class="card">
+    <div class="ornament">⚔️ &nbsp; ⚔️</div>
+    <div class="section-label">Ancient Greece</div>
+    <h1>Battle</h1>
+    <div class="divider">────── Σ ──────</div>
+
+    <p class="sub-text">
+      From the plains of Marathon to the narrow pass at Thermopylae —
+      the Greeks forged history with bronze, courage, and the phalanx.
+    </p>
+
+    <div class="battles-label">Famous Battles — Coming Soon</div>
+    <div class="battles-grid">
+      <div class="battle-chip">Marathon · 490 BC</div>
+      <div class="battle-chip">Thermopylae · 480 BC</div>
+      <div class="battle-chip">Salamis · 480 BC</div>
+      <div class="battle-chip">Plataea · 479 BC</div>
+      <div class="battle-chip">Syracuse · 415 BC</div>
+    </div>
+
+    <p class="coming-soon">
+      Battle mode is being forged in the fires of Hephaestus.<br/>
+      Return soon, warrior.
+    </p>
+
+    <a class="back-link" href="greece.html">◂ Return to Ancient Greece</a>
+  </div>
+
+</body>
+</html>
