@@ -6,7 +6,6 @@ through a gamified "Time Machine" cockpit interface.
 Built with plain HTML, CSS, and vanilla JavaScript.
 Uses Tailwind CSS via CDN — no build step, no dependencies to install.
 
-
 ---
 
 ## Running locally

@@ -1,254 +1,608 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Battle — Ancient Greece</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Battle — Macedonia vs Persia</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-      background: radial-gradient(ellipse at 50% 30%,
-        #5C0000 0%, #250104 40%, #05010A 100%);
-      font-family: Georgia, serif;
-      color: white;
-      overflow: hidden;
-    }
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    min-height: 100vh;
+    background: linear-gradient(160deg, #3A414D 0%, #20242C 100%);
+    color: #E8E4D8;
+    padding: 20px 16px 40px;
+  }
 
-    /* Gold border strips */
-    body::before, body::after {
-      content: '';
-      display: block;
-      position: fixed;
-      left: 0; right: 0;
-      height: 4px;
-      background: linear-gradient(90deg,
-        #5C0000, #C0392B, #FFD700, #C0392B, #5C0000);
-    }
-    body::before { top: 0; }
-    body::after  { bottom: 0; }
+  #back-btn {
+    display: inline-block;
+    color: rgba(201,168,76,0.6);
+    text-decoration: none;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    transition: color 0.2s;
+  }
+  #back-btn:hover { color: #FFD700; }
 
-    /* Back button */
-    #back-btn {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      color: rgba(201,168,76,0.55);
-      text-decoration: none;
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      font-family: 'Courier New', monospace;
-      text-transform: uppercase;
-      transition: color 0.2s;
-      z-index: 10;
-    }
-    #back-btn:hover { color: #FFD700; }
+  .header { text-align: center; margin-bottom: 16px; }
+  .header .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: #C9A84C;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .header h1 {
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #F0D98C;
+  }
 
-    /* Animated background clash lines */
-    .clash-line {
-      position: fixed;
-      width: 2px;
-      background: linear-gradient(to bottom, transparent, rgba(200,50,0,0.3), transparent);
-      animation: clashPulse ease-in-out infinite;
-    }
-    @keyframes clashPulse {
-      0%, 100% { opacity: 0.1; transform: scaleY(0.8); }
-      50%       { opacity: 0.5; transform: scaleY(1.2); }
-    }
+  #turn-banner {
+    text-align: center;
+    padding: 8px;
+    margin: 0 auto 14px;
+    max-width: 760px;
+    border-radius: 4px;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
 
-    /* Pulsing red glow circles */
-    .glow-orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(60px);
-      animation: orbPulse ease-in-out infinite;
-      pointer-events: none;
-    }
-    @keyframes orbPulse {
-      0%, 100% { opacity: 0.15; transform: scale(1); }
-      50%       { opacity: 0.30; transform: scale(1.15); }
-    }
+  .layout {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 760px;
+    margin: 0 auto;
+  }
 
-    /* Main card */
-    .card {
-      position: relative;
-      z-index: 5;
-      max-width: 780px;
-      width: 100%;
-      text-align: center;
-      border: 2px solid rgba(180,30,0,0.55);
-      border-radius: 4px;
-      padding: 56px 48px 48px;
-      background: rgba(0,0,0,0.60);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 0 40px rgba(140,0,0,0.35), 0 0 80px rgba(140,0,0,0.15);
-    }
+  .roster {
+    width: 130px;
+    flex-shrink: 0;
+  }
+  .roster .roster-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .unit-card {
+    padding: 6px 8px;
+    margin-bottom: 6px;
+    font-size: 10px;
+    border-radius: 4px;
+  }
+  .unit-card .row { display: flex; justify-content: space-between; }
+  .unit-card .bar-track { width: 100%; height: 3px; background: #1A1A1A; border-radius: 2px; margin-top: 3px; overflow: hidden; }
+  .unit-card .bar-fill { height: 100%; }
 
-    .ornament {
-      color: rgba(192,57,43,0.7);
-      font-size: 24px;
-      letter-spacing: 0.2em;
-      margin-bottom: 20px;
-    }
+  #board {
+    display: grid;
+    grid-template-columns: repeat(6, 56px);
+    grid-template-rows: repeat(6, 56px);
+    gap: 2px;
+    border: 3px solid #C9A84C;
+    border-radius: 4px;
+    padding: 4px;
+    background: #2A2E36;
+  }
+  .tile {
+    width: 56px; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tile.dark  { background: #7A2424; }
+  .tile.light { background: #9B3A3A; }
+  .tile.reach  { outline: 2px solid #4ADE80; outline-offset: -2px; cursor: pointer; }
+  .tile.attackable { outline: 3px solid #FF4040; outline-offset: -2px; cursor: pointer; }
 
-    .section-label {
-      color: rgba(201,168,76,0.45);
-      font-size: 9px;
-      letter-spacing: 0.5em;
-      font-family: 'Courier New', monospace;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
+  .token-wrap {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 3px;
+  }
+  .token {
+    width: 38px; height: 38px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: bold; font-family: monospace;
+  }
+  .token.mac {
+    background: linear-gradient(160deg, #E8C76A, #A8842E);
+    border: 2px solid #1F3A5F;
+    color: #1F2B3D;
+  }
+  .token.per {
+    background: linear-gradient(160deg, #8B1A1A, #4A0808);
+    border: 2px solid #C9A84C;
+    color: #F4E4B0;
+  }
+  .token.selected { box-shadow: 0 0 0 3px #FFD700, 0 0 14px #FFD700; }
+  .token.acted { opacity: 0.55; }
+  .hp-track { width: 36px; height: 4px; background: #1A1A1A; border-radius: 2px; overflow: hidden; }
+  .hp-fill { height: 100%; }
 
-    h1 {
-      font-size: clamp(3rem, 7vw, 5.5rem);
-      font-weight: 900;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      font-family: 'Courier New', monospace;
-      background: linear-gradient(175deg, #FF6060 0%, #C0392B 40%, #8B0000 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 6px;
-      animation: titlePulse 3s ease-in-out infinite;
-    }
-    @keyframes titlePulse {
-      0%, 100% { filter: drop-shadow(0 0 10px rgba(200,30,0,0.4)); }
-      50%       { filter: drop-shadow(0 0 28px rgba(200,30,0,0.9)); }
-    }
+  #end-turn-btn {
+    width: 100%; margin-top: 8px; padding: 8px 0;
+    border: none; border-radius: 4px;
+    font-family: monospace; font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase; font-weight: bold;
+  }
 
-    .divider {
-      color: rgba(180,30,0,0.5);
-      font-size: 12px;
-      letter-spacing: 0.2em;
-      margin: 8px auto 28px;
-    }
+  #log-panel, #rules-panel {
+    max-width: 760px;
+    margin: 12px auto 0;
+    border-radius: 4px;
+    padding: 10px 16px;
+    font-size: 11px;
+    line-height: 1.8;
+    color: #C9C5B8;
+  }
+  #log-panel { background: rgba(0,0,0,0.35); border: 1px solid #444; }
+  #rules-panel { background: rgba(0,0,0,0.30); border: 1px solid #555; }
+  #rules-panel .rules-title {
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #C9A84C; margin-bottom: 8px; font-weight: bold;
+  }
 
-    .sub-text {
-      color: rgba(240,200,180,0.70);
-      font-size: clamp(0.95rem, 1.8vw, 1.2rem);
-      font-style: italic;
-      line-height: 1.7;
-      margin-bottom: 16px;
-    }
-
-    .battles-label {
-      color: rgba(201,168,76,0.45);
-      font-size: 9px;
-      letter-spacing: 0.3em;
-      font-family: 'Courier New', monospace;
-      text-transform: uppercase;
-      margin: 28px 0 16px;
-    }
-
-    /* Famous battles preview (coming soon) */
-    .battles-grid {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 36px;
-    }
-    .battle-chip {
-      padding: 6px 14px;
-      border: 1px solid rgba(180,30,0,0.4);
-      border-radius: 2px;
-      color: rgba(220,160,140,0.6);
-      font-size: 10px;
-      letter-spacing: 0.18em;
-      font-family: 'Courier New', monospace;
-      text-transform: uppercase;
-      background: rgba(120,0,0,0.15);
-    }
-
-    .coming-soon {
-      color: rgba(201,168,76,0.4);
-      font-size: 11px;
-      letter-spacing: 0.22em;
-      font-family: 'Courier New', monospace;
-      text-transform: uppercase;
-      margin-bottom: 32px;
-    }
-
-    .back-link {
-      display: inline-block;
-      padding: 12px 32px;
-      color: #C9A84C;
-      border: 1px solid rgba(201,168,76,0.4);
-      border-radius: 2px;
-      text-decoration: none;
-      font-size: 10px;
-      letter-spacing: 0.25em;
-      font-family: 'Courier New', monospace;
-      text-transform: uppercase;
-      transition: all 0.2s ease;
-      background: rgba(201,168,76,0.05);
-    }
-    .back-link:hover {
-      background: rgba(201,168,76,0.14);
-      color: #FFD700;
-      border-color: #FFD700;
-      box-shadow: 0 0 18px rgba(255,215,0,0.22);
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .card { animation: fadeUp 0.7s ease both; }
-  </style>
+  #game-over-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.88);
+    display: none;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 50;
+  }
+  #game-over-overlay.active { display: flex; }
+  #go-title {
+    font-size: 38px; font-weight: 900; letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+  #go-sub { font-size: 12px; color: #C9C5B8; margin-bottom: 22px; }
+  #go-buttons { display: flex; gap: 12px; }
+  .go-btn {
+    padding: 10px 26px; border: none; border-radius: 4px;
+    font-family: monospace; font-size: 12px; letter-spacing: 0.15em;
+    text-transform: uppercase; font-weight: bold; cursor: pointer;
+    text-decoration: none; display: inline-block;
+  }
+</style>
 </head>
 <body>
 
-  <!-- Atmospheric red glow orbs -->
-  <div class="glow-orb" style="width:500px;height:500px;background:#8B0000;
-       top:-100px;left:-150px;animation-duration:4s;animation-delay:0s;"></div>
-  <div class="glow-orb" style="width:400px;height:400px;background:#6B0000;
-       bottom:-80px;right:-100px;animation-duration:5s;animation-delay:1.5s;"></div>
+<a id="back-btn" href="greece.html">◂ Return to Ancient Greece</a>
 
-  <!-- Animated vertical clash lines -->
-  <div class="clash-line" style="height:100%;top:0;left:20%;animation-duration:3s;animation-delay:0s;"></div>
-  <div class="clash-line" style="height:100%;top:0;left:45%;animation-duration:4s;animation-delay:0.8s;"></div>
-  <div class="clash-line" style="height:100%;top:0;left:70%;animation-duration:3.5s;animation-delay:1.6s;"></div>
-  <div class="clash-line" style="height:100%;top:0;left:85%;animation-duration:2.8s;animation-delay:0.4s;"></div>
+<div class="header">
+  <div class="eyebrow">── A mini strategy game ──</div>
+  <h1>Macedonia vs Persia</h1>
+</div>
 
-  <a id="back-btn" href="greece.html">◂ Back to Ancient Greece</a>
+<div id="turn-banner"></div>
 
-  <div class="card">
-    <div class="ornament">⚔️ &nbsp; ⚔️</div>
-    <div class="section-label">Ancient Greece</div>
-    <h1>Battle</h1>
-    <div class="divider">────── Σ ──────</div>
-
-    <p class="sub-text">
-      From the plains of Marathon to the narrow pass at Thermopylae —
-      the Greeks forged history with bronze, courage, and the phalanx.
-    </p>
-
-    <div class="battles-label">Famous Battles — Coming Soon</div>
-    <div class="battles-grid">
-      <div class="battle-chip">Marathon · 490 BC</div>
-      <div class="battle-chip">Thermopylae · 480 BC</div>
-      <div class="battle-chip">Salamis · 480 BC</div>
-      <div class="battle-chip">Plataea · 479 BC</div>
-      <div class="battle-chip">Syracuse · 415 BC</div>
-    </div>
-
-    <p class="coming-soon">
-      Battle mode is being forged in the fires of Hephaestus.<br/>
-      Return soon, warrior.
-    </p>
-
-    <a class="back-link" href="greece.html">◂ Return to Ancient Greece</a>
+<div class="layout">
+  <div class="roster">
+    <div class="roster-label" style="color:#FF8080;">Persia (AI)</div>
+    <div id="persia-roster"></div>
   </div>
+
+  <div id="board"></div>
+
+  <div class="roster">
+    <div class="roster-label" style="color:#FFD700;">Macedonia (you)</div>
+    <div id="macedonia-roster"></div>
+    <button id="end-turn-btn">End turn</button>
+  </div>
+</div>
+
+<div id="log-panel"></div>
+
+<div id="rules-panel">
+  <div class="rules-title">Rules of engagement</div>
+  <div>▸ 6×6 board. Three units per side. Eliminate the enemy to win.</div>
+  <div>▸ Each turn, move or attack with each of your units, then End turn.</div>
+  <div>▸ Movement: Infantry and General move 2 tiles, Cavalry moves 4 tiles (diagonals count).</div>
+  <div>▸ Attacking always deals full damage to the target.</div>
+  <div>▸ If the target survives, it strikes back for half its damage — except the Persian Archer.</div>
+  <div>▸ The Archer takes no return damage when firing from 2 tiles away, but takes full return damage if caught in melee at 1 tile.</div>
+</div>
+
+<div id="game-over-overlay">
+  <div id="go-title"></div>
+  <div id="go-sub"></div>
+  <div id="go-buttons">
+    <button class="go-btn" id="play-again-btn" style="background:#C9A84C; color:#1F2B3D;">Play again</button>
+    <a class="go-btn" href="greece.html" style="background:transparent; border:1px solid #C9A84C; color:#C9A84C;">Return to Greece</a>
+  </div>
+</div>
+
+<script>
+const SIZE = 6;
+
+const UNIT_DEFS = {
+  macedonia: [
+    { key: "infantry", name: "Infantry", abbr: "INF", dmg: 50,  hp: 50,  move: 2, range: 1 },
+    { key: "general",  name: "General",  abbr: "GEN", dmg: 100, hp: 120, move: 2, range: 1 },
+    { key: "cavalry",  name: "Cavalry",  abbr: "CAV", dmg: 80,  hp: 100, move: 4, range: 1 },
+  ],
+  persia: [
+    { key: "infantry", name: "Infantry", abbr: "INF", dmg: 20, hp: 400, move: 2, range: 1 },
+    { key: "cavalry",  name: "Cavalry",  abbr: "CAV", dmg: 30, hp: 200, move: 4, range: 1 },
+    { key: "archer",   name: "Archer",   abbr: "ARC", dmg: 25, hp: 20,  move: 2, range: 2, isArcher: true },
+  ],
+};
+
+const START_POS = {
+  macedonia: [[0, 5], [2, 5], [4, 5]],
+  persia:    [[0, 0], [2, 0], [4, 0]],
+};
+
+let units = [];
+let turn = "macedonia";
+let selectedId = null;
+let log = [];
+let gameOver = null;
+let aiThinking = false;
+
+function makeUnits() {
+  let id = 0;
+  const list = [];
+  ["macedonia", "persia"].forEach(side => {
+    UNIT_DEFS[side].forEach((def, i) => {
+      const [row, col] = START_POS[side][i];
+      list.push({
+        id: id++, side, ...def,
+        maxHp: def.hp, curHp: def.hp,
+        row, col, alive: true, acted: false,
+      });
+    });
+  });
+  return list;
+}
+
+function dist(a, b) {
+  return Math.max(Math.abs(a.row - b.row), Math.abs(a.col - b.col));
+}
+function labelOf(u) {
+  return (u.side === "macedonia" ? "Macedonian" : "Persian") + " " + u.name;
+}
+function getUnitAt(row, col) {
+  return units.find(u => u.alive && u.row === row && u.col === col);
+}
+function getReachable(unit) {
+  const out = [];
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      if (r === unit.row && c === unit.col) continue;
+      if (getUnitAt(r, c)) continue;
+      if (dist({ row: r, col: c }, unit) <= unit.move) out.push({ row: r, col: c });
+    }
+  }
+  return out;
+}
+function getAttackable(unit) {
+  const enemySide = unit.side === "macedonia" ? "persia" : "macedonia";
+  return units.filter(u => u.alive && u.side === enemySide && dist(u, unit) <= unit.range);
+}
+function hpColor(pct) {
+  if (pct > 0.6) return "#3FA34D";
+  if (pct > 0.3) return "#D4A017";
+  return "#C0392B";
+}
+function addLog(msg) {
+  log.push(msg);
+  if (log.length > 8) log = log.slice(-8);
+}
+
+function resolveCombat(attacker, defender) {
+  const dmg = attacker.dmg;
+  defender.curHp -= dmg;
+  addLog(`${labelOf(attacker)} attacks ${labelOf(defender)} for ${dmg} damage.`);
+  if (defender.curHp <= 0) {
+    defender.curHp = 0;
+    defender.alive = false;
+    addLog(`${labelOf(defender)} has fallen.`);
+    return;
+  }
+  let counter;
+  if (attacker.isArcher) {
+    const d = dist(attacker, defender);
+    counter = d >= 2 ? 0 : defender.dmg;
+  } else {
+    counter = Math.round(defender.dmg * 0.5);
+  }
+  if (counter > 0) {
+    attacker.curHp -= counter;
+    addLog(`${labelOf(defender)} retaliates for ${counter} damage.`);
+    if (attacker.curHp <= 0) {
+      attacker.curHp = 0;
+      attacker.alive = false;
+      addLog(`${labelOf(attacker)} has fallen.`);
+    }
+  } else {
+    addLog(`${labelOf(defender)} could not retaliate from range.`);
+  }
+}
+
+function checkWin() {
+  const mAlive = units.some(u => u.side === "macedonia" && u.alive);
+  const pAlive = units.some(u => u.side === "persia" && u.alive);
+  if (!mAlive) return "defeat";
+  if (!pAlive) return "victory";
+  return null;
+}
+
+function render() {
+  const banner = document.getElementById("turn-banner");
+  if (gameOver) {
+    banner.textContent = "Battle over";
+    banner.style.background = "rgba(80,80,80,0.2)";
+    banner.style.border = "1px solid #888";
+    banner.style.color = "#C9C5B8";
+  } else if (turn === "macedonia") {
+    banner.textContent = "Macedonia's turn — select a unit";
+    banner.style.background = "rgba(201,168,76,0.15)";
+    banner.style.border = "1px solid #C9A84C";
+    banner.style.color = "#FFD700";
+  } else {
+    banner.textContent = "Persia is moving...";
+    banner.style.background = "rgba(139,26,26,0.25)";
+    banner.style.border = "1px solid #8B1A1A";
+    banner.style.color = "#FF8080";
+  }
+
+  const selectedUnit = units.find(u => u.id === selectedId) || null;
+  const reachable = selectedUnit ? getReachable(selectedUnit) : [];
+  const attackable = selectedUnit ? getAttackable(selectedUnit) : [];
+
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      const tile = document.createElement("div");
+      const isDarkTile = (r + c) % 2 === 0;
+      tile.className = "tile " + (isDarkTile ? "dark" : "light");
+
+      const unit = getUnitAt(r, c);
+      const isReachTile = reachable.some(t => t.row === r && t.col === c);
+      const isAtkTile = unit && attackable.some(u => u.id === unit.id);
+      if (isReachTile) tile.classList.add("reach");
+      if (isAtkTile) tile.classList.add("attackable");
+
+      if (unit) {
+        const wrap = document.createElement("div");
+        wrap.className = "token-wrap";
+
+        const tok = document.createElement("div");
+        tok.className = "token " + (unit.side === "macedonia" ? "mac" : "per");
+        if (selectedUnit && selectedUnit.id === unit.id) tok.classList.add("selected");
+        if (unit.acted) tok.classList.add("acted");
+        tok.textContent = unit.abbr;
+        wrap.appendChild(tok);
+
+        const hpTrack = document.createElement("div");
+        hpTrack.className = "hp-track";
+        const hpFill = document.createElement("div");
+        hpFill.className = "hp-fill";
+        const pct = unit.curHp / unit.maxHp;
+        hpFill.style.width = (pct * 100) + "%";
+        hpFill.style.background = hpColor(pct);
+        hpTrack.appendChild(hpFill);
+        wrap.appendChild(hpTrack);
+
+        tile.appendChild(wrap);
+      }
+
+      tile.addEventListener("click", () => handleTileClick(r, c));
+      board.appendChild(tile);
+    }
+  }
+
+  renderRoster("persia-roster", "persia");
+  renderRoster("macedonia-roster", "macedonia");
+
+  const logPanel = document.getElementById("log-panel");
+  logPanel.innerHTML = log.map(l => `<div>▸ ${l}</div>`).join("");
+
+  const endBtn = document.getElementById("end-turn-btn");
+  const canEnd = turn === "macedonia" && !gameOver && !aiThinking;
+  endBtn.disabled = !canEnd;
+  endBtn.style.background = canEnd ? "#C9A84C" : "#444";
+  endBtn.style.color = canEnd ? "#1F2B3D" : "#888";
+  endBtn.style.cursor = canEnd ? "pointer" : "default";
+
+  const overlay = document.getElementById("game-over-overlay");
+  if (gameOver) {
+    overlay.classList.add("active");
+    const title = document.getElementById("go-title");
+    const sub = document.getElementById("go-sub");
+    if (gameOver === "victory") {
+      title.textContent = "Victory!";
+      title.style.color = "#FFD700";
+      sub.textContent = "Persia has been routed.";
+    } else {
+      title.textContent = "Defeat";
+      title.style.color = "#FF4040";
+      sub.textContent = "Macedonia's forces have fallen.";
+    }
+  } else {
+    overlay.classList.remove("active");
+  }
+}
+
+function renderRoster(containerId, side) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  units.filter(u => u.side === side).forEach(u => {
+    const card = document.createElement("div");
+    card.className = "unit-card";
+    card.style.background = side === "macedonia" ? "rgba(201,168,76,0.12)" : "rgba(139,26,26,0.15)";
+    card.style.border = "1px solid " + (side === "macedonia" ? "rgba(201,168,76,0.4)" : "rgba(139,26,26,0.4)");
+    card.style.opacity = u.alive ? "1" : "0.3";
+
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<span>${u.name}</span><span>${u.curHp}/${u.maxHp}</span>`;
+    card.appendChild(row);
+
+    const track = document.createElement("div");
+    track.className = "bar-track";
+    const fill = document.createElement("div");
+    fill.className = "bar-fill";
+    const pct = u.curHp / u.maxHp;
+    fill.style.width = (pct * 100) + "%";
+    fill.style.background = hpColor(pct);
+    track.appendChild(fill);
+    card.appendChild(track);
+
+    container.appendChild(card);
+  });
+}
+
+function handleTileClick(row, col) {
+  if (turn !== "macedonia" || gameOver || aiThinking) return;
+  const clicked = getUnitAt(row, col);
+  const selectedUnit = units.find(u => u.id === selectedId) || null;
+
+  if (selectedUnit) {
+    const reachable = getReachable(selectedUnit);
+    const attackable = getAttackable(selectedUnit);
+    const isAttackTarget = clicked && attackable.some(u => u.id === clicked.id);
+    const isMoveTarget = reachable.some(t => t.row === row && t.col === col);
+
+    if (clicked && clicked.side === "persia" && isAttackTarget) {
+      resolveCombat(selectedUnit, clicked);
+      selectedUnit.acted = true;
+      selectedId = null;
+      render();
+      const result = checkWin();
+      if (result) { gameOver = result; render(); return; }
+      maybeAutoEnd();
+      return;
+    }
+
+    if (!clicked && isMoveTarget) {
+      selectedUnit.row = row; selectedUnit.col = col; selectedUnit.acted = true;
+      addLog(`${labelOf(selectedUnit)} moves.`);
+      selectedId = null;
+      render();
+      maybeAutoEnd();
+      return;
+    }
+
+    if (clicked && clicked.side === "macedonia" && !clicked.acted) {
+      selectedId = clicked.id;
+      render();
+      return;
+    }
+
+    selectedId = null;
+    render();
+    return;
+  }
+
+  if (clicked && clicked.side === "macedonia" && !clicked.acted) {
+    selectedId = clicked.id;
+    render();
+  }
+}
+
+function maybeAutoEnd() {
+  const mUnits = units.filter(u => u.side === "macedonia" && u.alive);
+  if (mUnits.every(u => u.acted)) {
+    setTimeout(() => endTurnToAI(), 500);
+  }
+}
+
+function endTurnToAI() {
+  units.filter(u => u.side === "persia").forEach(u => u.acted = false);
+  turn = "persia";
+  addLog("Persia is on the move...");
+  aiThinking = true;
+  render();
+  const aiUnitIds = units.filter(u => u.side === "persia" && u.alive).map(u => u.id);
+  runAIStep(aiUnitIds, 0);
+}
+
+function runAIStep(unitIds, idx) {
+  if (idx >= unitIds.length) {
+    setTimeout(() => startMacedoniaTurn(), 400);
+    return;
+  }
+  setTimeout(() => {
+    const unit = units.find(u => u.id === unitIds[idx]);
+
+    if (!unit || !unit.alive) {
+      runAIStep(unitIds, idx + 1);
+      return;
+    }
+
+    const enemiesInRange = getAttackable(unit);
+    if (enemiesInRange.length > 0) {
+      enemiesInRange.sort((a, b) => a.curHp - b.curHp);
+      const target = units.find(u => u.id === enemiesInRange[0].id);
+      resolveCombat(unit, target);
+    } else {
+      const aliveEnemies = units.filter(u => u.side === "macedonia" && u.alive);
+      if (aliveEnemies.length > 0) {
+        let closest = aliveEnemies[0];
+        aliveEnemies.forEach(e => { if (dist(unit, e) < dist(unit, closest)) closest = e; });
+        const reach = getReachable(unit);
+        if (reach.length > 0) {
+          reach.sort((a, b) => dist(a, closest) - dist(b, closest));
+          const dest = reach[0];
+          if (dist(dest, closest) < dist(unit, closest)) {
+            unit.row = dest.row; unit.col = dest.col;
+            addLog(`${labelOf(unit)} advances.`);
+          } else {
+            addLog(`${labelOf(unit)} holds position.`);
+          }
+        }
+      }
+    }
+    unit.acted = true;
+    render();
+
+    const result = checkWin();
+    if (result) { gameOver = result; aiThinking = false; render(); return; }
+
+    runAIStep(unitIds, idx + 1);
+  }, 700);
+}
+
+function startMacedoniaTurn() {
+  units.filter(u => u.side === "macedonia").forEach(u => u.acted = false);
+  turn = "macedonia";
+  aiThinking = false;
+  addLog("Your turn, Macedonia.");
+  render();
+}
+
+function restart() {
+  units = makeUnits();
+  turn = "macedonia";
+  selectedId = null;
+  log = ["The battle begins. Macedonia moves first."];
+  gameOver = null;
+  aiThinking = false;
+  render();
+}
+
+document.getElementById("end-turn-btn").addEventListener("click", () => {
+  if (turn !== "macedonia" || gameOver || aiThinking) return;
+  selectedId = null;
+  endTurnToAI();
+});
+document.getElementById("play-again-btn").addEventListener("click", restart);
+
+restart();
+</script>
 
 </body>
 </html>
